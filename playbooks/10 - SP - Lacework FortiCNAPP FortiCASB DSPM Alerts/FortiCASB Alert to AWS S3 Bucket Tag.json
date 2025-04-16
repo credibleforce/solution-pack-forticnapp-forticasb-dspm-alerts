@@ -32,6 +32,34 @@
         },
         {
             "@type": "WorkflowStep",
+            "name": "Check for Alerts and Activity",
+            "description": null,
+            "arguments": {
+                "conditions": [
+                    {
+                        "option": "activity found",
+                        "step_iri": "\/api\/3\/workflow_steps\/cd86dc59-6679-48d6-a028-e59fe0d538b9",
+                        "condition": "{{ vars.steps.Search_Activity.data.activities | length >= 1 }}",
+                        "step_name": "Merge Alerts and Activity"
+                    },
+                    {
+                        "option": "no activity",
+                        "default": true,
+                        "step_iri": "\/api\/3\/workflow_steps\/67733d16-3839-41dd-8b36-9aadb2d9e1a9",
+                        "step_name": "Update Last Time"
+                    }
+                ],
+                "step_variables": []
+            },
+            "status": null,
+            "top": "1020",
+            "left": "820",
+            "stepType": "\/api\/3\/workflow_step_types\/12254cf5-5db7-4b1a-8cb1-3af081924b28",
+            "group": null,
+            "uuid": "6315f336-a905-450d-bf92-e7644ba4294f"
+        },
+        {
+            "@type": "WorkflowStep",
             "name": "CLI Vars",
             "description": null,
             "arguments": {
@@ -50,6 +78,28 @@
             "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
             "group": null,
             "uuid": "c450edb6-8a4f-4ab5-b8d2-587ff406ceb0"
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Datapatterns",
+            "description": null,
+            "arguments": {
+                "name": "Fortinet FortiCASB",
+                "config": "e7a4768d-29bd-4aea-a7c9-b8b4a2d1e18f",
+                "params": [],
+                "version": "2.0.0",
+                "connector": "forticasb",
+                "operation": "get_datapatterns",
+                "operationTitle": "Get Data Patterns",
+                "pickFromTenant": false,
+                "step_variables": []
+            },
+            "status": null,
+            "top": "380",
+            "left": "660",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "group": null,
+            "uuid": "383d04cb-ba0d-4887-a954-13381627ac34"
         },
         {
             "@type": "WorkflowStep",
@@ -196,7 +246,7 @@
                     "parallel": false,
                     "condition": ""
                 },
-                "forticnapp_event": "{%- set policy_code = vars.alert_details[vars.item].alert.policyCode %}\n{%- set code_num = policy_code.split('-')[-1] | int %}\n{%- set all_patterns = \t vars.steps.Policies.data.policies[0].data.datas[0].piiPatterns \n \t \t\t\t\t\t + vars.steps.Policies.data.policies[0].data.datas[0].finPatterns \n                         + vars.steps.Policies.data.policies[0].data.datas[0].malwarePatterns \n                         + vars.steps.Policies.data.policies[0].data.datas[0].customizedPatterns %}\n{\n  \"id\": \"{{ vars.alert_details[vars.item].alert.id }}\",\n  \"buid\": \"{{ vars.alert_details[vars.item].alert.buid }}\",\n  \"service\": \"{{ vars.alert_details[vars.item].alert.service }}\",\n  \"applicationId\": \"{{ vars.alert_details[vars.item].alert.applicationId }}\",\n  \"region\": \"{{ vars.alert_details[vars.item].alert.region }}\",\n  \"severity\": \"{{ vars.alert_details[vars.item].alert.severity }}\",\n  \"userName\": \"{{ vars.alert_details[vars.item].alert.userName }}\",\n  \"object\": \"{{ vars.alert_details[vars.item].alert.object }}\",\n  \"policyCode\": \"{{ vars.alert_details[vars.item].alert.policyCode }}\",\n  \"policyCategory\": \"{{ (all_patterns | selectattr('code', 'equalto', code_num) | first).category | default('Unknown Category') }}\",\n  \"policyName\": \"{{ vars.alert_details[vars.item].alert.policyName }}\",\n  \"displayOperation\": \"{{ vars.alert_details[vars.item].alert.displayOperation }}\",\n  \"violationActivity\": \"{{ vars.alert_details[vars.item].alert.violationActivity }}\",\n  \"eventId\": \"{{ (vars.alert_details[vars.item].activity.rawData | from_json).eventId }}\",\n  \"awsRegion\": \"{{ (vars.alert_details[vars.item].activity.rawData | from_json).awsRegion }}\",\n  \"eventName\": \"{{ (vars.alert_details[vars.item].activity.rawData | from_json).eventName }}\",\n  \"eventTime\": \"{{ (vars.alert_details[vars.item].activity.rawData | from_json).eventTime }}\",\n  \"requestID\": \"{{ (vars.alert_details[vars.item].activity.rawData | from_json).requestID }}\",\n  \"eventSource\": \"{{ (vars.alert_details[vars.item].activity.rawData | from_json).eventSource }}\",\n  \"userIdentityArn\": \"{{ (vars.alert_details[vars.item].activity.rawData | from_json).userIdentity.arn }}\",\n  \"userIdentityType\": \"{{ (vars.alert_details[vars.item].activity.rawData | from_json).userIdentity.type }}\",\n  \"userIdentityAccountId\": \"{{ (vars.alert_details[vars.item].activity.rawData | from_json).userIdentity.accountId }}\",\n  \"userIdentityPrincipalId\": \"{{ (vars.alert_details[vars.item].activity.rawData | from_json).userIdentity.principalId }}\",\n  \"sourceIPAddress\": \"{{ (vars.alert_details[vars.item].activity.rawData | from_json).sourceIPAddress }}\",\n  \"recipientAccountId\": \"{{ (vars.alert_details[vars.item].activity.rawData | from_json).recipientAccountId }}\",\n  \"bucketName\": \"{{ (vars.alert_details[vars.item].activity.rawData | from_json).requestParameters.bucketName }}\",\n  \"key\": \"{{ (vars.alert_details[vars.item].activity.rawData | from_json).requestParameters.key }}\"\n}"
+                "forticnapp_event": "{%- set policy_code = vars.alert_details[vars.item].alert.policyName %}\n{%- set code_num = policy_code %}\n{%- set all_patterns = \t vars.steps.Policies.data.policies[0].data.datas[0].piiPatterns \n                         + vars.steps.Policies.data.policies[0].data.datas[0].finPatterns\n                         + vars.steps.Policies.data.policies[0].data.datas[0].malwarePatterns\n                         + vars.steps.Policies.data.policies[0].data.datas[0].customizedPatterns\n                      \n%}\n{%- set data_all_patterns = \t vars.steps.Datapatterns.data.datapatterns %}\n{%- set policyCategory = \n     (all_patterns\n        | selectattr('displayName','equalto',code_num)\n        | map(attribute='category')\n        | list\n        | first\n     )\n  or (data_all_patterns\n        | selectattr('name','equalto',code_num)\n        | map(attribute='dataPatternCategory')\n        | list\n        | first\n     )\n  or 'Unknown Category'\n-%}\n{\n  \"id\": \"{{ vars.alert_details[vars.item].alert.id }}\",\n  \"buid\": \"{{ vars.alert_details[vars.item].alert.buid }}\",\n  \"service\": \"{{ vars.alert_details[vars.item].alert.service }}\",\n  \"applicationId\": \"{{ vars.alert_details[vars.item].alert.applicationId }}\",\n  \"region\": \"{{ vars.alert_details[vars.item].alert.region }}\",\n  \"severity\": \"{{ vars.alert_details[vars.item].alert.severity }}\",\n  \"userName\": \"{{ vars.alert_details[vars.item].alert.userName }}\",\n  \"object\": \"{{ vars.alert_details[vars.item].alert.object }}\",\n  \"policyCode\": \"{{ vars.alert_details[vars.item].alert.policyCode }}\",\n  \"policyCategory\": \"{{ policyCategory }}\",\n  \"policyName\": \"{{ vars.alert_details[vars.item].alert.policyName }}\",\n  \"displayOperation\": \"{{ vars.alert_details[vars.item].alert.displayOperation }}\",\n  \"violationActivity\": \"{{ vars.alert_details[vars.item].alert.violationActivity }}\",\n  \"eventId\": \"{{ (vars.alert_details[vars.item].activity.rawData | from_json).eventId }}\",\n  \"awsRegion\": \"{{ (vars.alert_details[vars.item].activity.rawData | from_json).awsRegion }}\",\n  \"eventName\": \"{{ (vars.alert_details[vars.item].activity.rawData | from_json).eventName }}\",\n  \"eventTime\": \"{{ (vars.alert_details[vars.item].activity.rawData | from_json).eventTime }}\",\n  \"requestID\": \"{{ (vars.alert_details[vars.item].activity.rawData | from_json).requestID }}\",\n  \"eventSource\": \"{{ (vars.alert_details[vars.item].activity.rawData | from_json).eventSource }}\",\n  \"userIdentityArn\": \"{{ (vars.alert_details[vars.item].activity.rawData | from_json).userIdentity.arn }}\",\n  \"userIdentityType\": \"{{ (vars.alert_details[vars.item].activity.rawData | from_json).userIdentity.type }}\",\n  \"userIdentityAccountId\": \"{{ (vars.alert_details[vars.item].activity.rawData | from_json).userIdentity.accountId }}\",\n  \"userIdentityPrincipalId\": \"{{ (vars.alert_details[vars.item].activity.rawData | from_json).userIdentity.principalId }}\",\n  \"sourceIPAddress\": \"{{ (vars.alert_details[vars.item].activity.rawData | from_json).sourceIPAddress }}\",\n  \"recipientAccountId\": \"{{ (vars.alert_details[vars.item].activity.rawData | from_json).recipientAccountId }}\",\n  \"bucketName\": \"{{ (vars.alert_details[vars.item].activity.rawData | from_json).requestParameters.bucketName }}\",\n  \"key\": \"{{ (vars.alert_details[vars.item].activity.rawData | from_json).requestParameters.key }}\"\n}"
             },
             "status": null,
             "top": "1160",
@@ -339,20 +389,6 @@
         },
         {
             "@type": "WorkflowStep",
-            "name": "test",
-            "description": null,
-            "arguments": {
-                "test": "[ \"{{ vars.alert_details.keys() | join('\",\"') }}\"]"
-            },
-            "status": null,
-            "top": "1020",
-            "left": "660",
-            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
-            "group": null,
-            "uuid": "ef0c84dc-7253-4f48-8d8f-661282df919b"
-        },
-        {
-            "@type": "WorkflowStep",
             "name": "Update Last Time",
             "description": null,
             "arguments": {
@@ -402,13 +438,43 @@
         },
         {
             "@type": "WorkflowRoute",
-            "name": "Extract Results -> Policies",
+            "name": "Check for Alerts and Activity -> Merge Alerts and Activity",
+            "targetStep": "\/api\/3\/workflow_steps\/cd86dc59-6679-48d6-a028-e59fe0d538b9",
+            "sourceStep": "\/api\/3\/workflow_steps\/6315f336-a905-450d-bf92-e7644ba4294f",
+            "label": "activity found",
+            "isExecuted": false,
+            "group": null,
+            "uuid": "edb07d4b-12d2-4f47-92ad-94e5536b170b"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Check for Alerts and Activity -> Update Last Time",
+            "targetStep": "\/api\/3\/workflow_steps\/67733d16-3839-41dd-8b36-9aadb2d9e1a9",
+            "sourceStep": "\/api\/3\/workflow_steps\/6315f336-a905-450d-bf92-e7644ba4294f",
+            "label": "no activity",
+            "isExecuted": false,
+            "group": null,
+            "uuid": "e6735f85-aff5-4108-b4ed-977770f0bf47"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Datapatterns -> Policies",
             "targetStep": "\/api\/3\/workflow_steps\/4cab35ad-40cf-4ac0-b9ab-a8b0e7baa903",
+            "sourceStep": "\/api\/3\/workflow_steps\/383d04cb-ba0d-4887-a954-13381627ac34",
+            "label": null,
+            "isExecuted": false,
+            "group": null,
+            "uuid": "15df0447-42af-4cca-9a98-80e03ac85237"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Extract Results -> Datapatterns",
+            "targetStep": "\/api\/3\/workflow_steps\/383d04cb-ba0d-4887-a954-13381627ac34",
             "sourceStep": "\/api\/3\/workflow_steps\/f242c302-bea2-4225-9497-0bedeaa4debd",
             "label": null,
             "isExecuted": false,
             "group": null,
-            "uuid": "5d29da16-dbb2-497b-97bd-71c142ce579b"
+            "uuid": "605ce6de-526e-4f7d-920d-d14a90c8057f"
         },
         {
             "@type": "WorkflowRoute",
@@ -452,16 +518,6 @@
         },
         {
             "@type": "WorkflowRoute",
-            "name": "Merge Alerts and Activity -> test",
-            "targetStep": "\/api\/3\/workflow_steps\/ef0c84dc-7253-4f48-8d8f-661282df919b",
-            "sourceStep": "\/api\/3\/workflow_steps\/cd86dc59-6679-48d6-a028-e59fe0d538b9",
-            "label": null,
-            "isExecuted": false,
-            "group": null,
-            "uuid": "699b10ce-0ecb-49f3-8abe-c558fd7c9ed4"
-        },
-        {
-            "@type": "WorkflowRoute",
             "name": "Merge Bucket Tags -> tt",
             "targetStep": "\/api\/3\/workflow_steps\/c450edb6-8a4f-4ab5-b8d2-587ff406ceb0",
             "sourceStep": "\/api\/3\/workflow_steps\/2ea29f56-9a6d-4f90-8285-d407cb7f2172",
@@ -478,7 +534,7 @@
             "label": null,
             "isExecuted": false,
             "group": null,
-            "uuid": "a3bbebc2-8482-495f-9f7b-d172389fadb1"
+            "uuid": "ddf4591c-ba59-4445-8ca6-663f1f7b8cea"
         },
         {
             "@type": "WorkflowRoute",
@@ -488,17 +544,17 @@
             "label": null,
             "isExecuted": false,
             "group": null,
-            "uuid": "9f8079a8-cb40-4a49-afe6-f39691814917"
+            "uuid": "82b2a2fb-585b-4737-947b-3426cdc37ef6"
         },
         {
             "@type": "WorkflowRoute",
-            "name": "Search Activity -> final",
-            "targetStep": "\/api\/3\/workflow_steps\/cd86dc59-6679-48d6-a028-e59fe0d538b9",
+            "name": "Search Activity -> Check for Alerts and Activity",
+            "targetStep": "\/api\/3\/workflow_steps\/6315f336-a905-450d-bf92-e7644ba4294f",
             "sourceStep": "\/api\/3\/workflow_steps\/43646b07-0c0a-4cb8-8ab6-3d9ab9bad27f",
             "label": null,
             "isExecuted": false,
             "group": null,
-            "uuid": "4d5cb222-6703-48e5-98c3-974b9f067dfe"
+            "uuid": "df37674c-e982-43a9-a507-b717b8a72b62"
         },
         {
             "@type": "WorkflowRoute",
